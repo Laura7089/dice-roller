@@ -1,10 +1,10 @@
 [package]
 name = "dice-roller"
-description = "Roll dice for roleplaying games from the command line!"
-version = "1.0.0"
+description = "Roll dice for roleplaying games from the command line"
+version = "1.2.0"
 authors = ["Laura Demkowicz-Duffy <edward70891@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-rand = "0.7.3"
+rand = { version = "0.7.3", features = ["small_rng"] }
 structopt = "0.3.12"

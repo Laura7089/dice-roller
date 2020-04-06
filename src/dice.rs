@@ -1,4 +1,5 @@
-use rand::prelude::*;
+use rand::rngs::SmallRng;
+use rand::{Rng, SeedableRng};
 use std::error::Error;
 use std::fmt::{Display, Formatter};
 
@@ -9,7 +10,7 @@ impl Error for DiceError {}
 
 impl Display for DiceError {
     fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
-        write!(f, "Bad dice formatting. See --help for examples.")
+        write!(f, "See --help for examples.")
     }
 }
 
@@ -45,9 +46,9 @@ impl Dice {
     }
 
     pub fn roll(&self) -> Roll {
-        let mut rng = thread_rng();
-        let rolls = (0..(self.number))
-            .map(|_| rng.gen_range(1, self.value + 1))
+        let mut random = SmallRng::from_entropy();
+        let rolls: Vec<u32> = (0..(self.number))
+            .map(|_| (random.gen::<u32>() % self.value) + 1)
             .collect();
         Roll {
             desc: self.desc.clone(),
