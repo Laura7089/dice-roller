@@ -1,7 +1,19 @@
 use anyhow::{Context, Result};
 use rand::prelude::*;
 
-const NUMBER_ERROR: &'static str = " could not be parsed as a number";
+#[derive(Debug)]
+struct DiceError;
+
+impl std::error::Error for DiceError {}
+
+impl std::fmt::Display for DiceError {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(
+            f,
+            "Bad dice formatting.\nShould be [<number>]d<number>, like '10d6' or 'd8'"
+        )
+    }
+}
 
 #[derive(Debug)]
 pub struct Dice {
@@ -13,9 +25,14 @@ pub struct Dice {
 impl Dice {
     pub fn from_string(string_desc: &str) -> Result<Self> {
         let split: Vec<&str> = string_desc.split('d').collect();
+        split
+            .get(1)
+            .ok_or(DiceError)
+            .with_context(|| string_desc.to_owned())?;
         let value = split[1]
             .parse::<u32>()
-            .with_context(|| format!("'{}' {}", split[1], NUMBER_ERROR))?;
+            .map_err(|_| DiceError)
+            .with_context(|| string_desc.to_owned())?;
         if split[0] == "" {
             Ok(Dice {
                 desc: String::from(string_desc),
@@ -25,10 +42,10 @@ impl Dice {
         } else {
             let number = split[0]
                 .parse::<u32>()
-                .with_context(|| format!("'{}' {}", split[0], NUMBER_ERROR))?;
+                .with_context(|| split[0].to_owned())?;
 
             Ok(Dice {
-                desc: String::from(string_desc),
+                desc: string_desc.to_owned(),
                 number,
                 value,
             })
