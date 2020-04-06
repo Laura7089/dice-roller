@@ -9,10 +9,7 @@ impl Error for DiceError {}
 
 impl Display for DiceError {
     fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
-        write!(
-            f,
-            "Bad dice formatting.\nShould be [<number>]d<number>, like '10d6' or 'd8'"
-        )
+        write!(f, "Bad dice formatting. See --help for examples.")
     }
 }
 
