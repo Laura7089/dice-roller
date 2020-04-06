@@ -1,10 +1,10 @@
-use anyhow::{Context, Result};
 use rand::prelude::*;
+use std::error::Error;
 
 #[derive(Debug)]
 struct DiceError;
 
-impl std::error::Error for DiceError {}
+impl Error for DiceError {}
 
 impl std::fmt::Display for DiceError {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
@@ -29,16 +29,10 @@ pub struct Roll {
 }
 
 impl Dice {
-    pub fn new(string_desc: &str) -> Result<Self> {
+    pub fn new(string_desc: &str) -> Result<Self, Box<dyn Error>> {
         let split: Vec<&str> = string_desc.split('d').collect();
-        split
-            .get(1)
-            .ok_or(DiceError)
-            .with_context(|| string_desc.to_owned())?;
-        let value = split[1]
-            .parse::<u32>()
-            .map_err(|_| DiceError)
-            .with_context(|| string_desc.to_owned())?;
+        split.get(1).ok_or(DiceError)?;
+        let value = split[1].parse::<u32>().map_err(|_| DiceError)?;
         if split[0] == "" {
             Ok(Dice {
                 desc: String::from(string_desc),
@@ -46,10 +40,7 @@ impl Dice {
                 value,
             })
         } else {
-            let number = split[0]
-                .parse::<u32>()
-                .with_context(|| split[0].to_owned())?;
-
+            let number = split[0].parse::<u32>().map_err(|_| DiceError)?;
             Ok(Dice {
                 desc: string_desc.to_owned(),
                 number,
