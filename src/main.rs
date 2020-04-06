@@ -1,8 +1,5 @@
 mod dice;
 use dice::Dice;
-use std::error::Error;
-use std::fs;
-use std::path::PathBuf;
 use structopt::StructOpt;
 
 #[derive(StructOpt, Debug)]
@@ -14,7 +11,7 @@ struct Opt {
 
     /// Output file, leave blank for stdout
     #[structopt(short, long, parse(from_os_str))]
-    output: Option<PathBuf>,
+    output: Option<std::path::PathBuf>,
 
     /// Delimiting character for the list of dice, default ","
     #[structopt(short, long)]
@@ -27,55 +24,39 @@ struct Opt {
     /// Terse (result-only) output
     #[structopt(short, long)]
     terse: bool,
-    // /// CSV output
-    // #[structopt(short, long)]
-    // csv: bool,
 }
 
-fn main() -> Result<(), Box<dyn Error>> {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     let opt = Opt::from_args();
+    let delimiter = opt.delimiter.unwrap_or(',');
 
-    let dice = Dice::vec_from_string(opt.dice, opt.delimiter.unwrap_or(','))?;
-    let rolls: Vec<Vec<u32>> = dice.iter().map(|x| x.roll()).collect();
+    // Roll our dice
+    let rolls: Vec<_> = Dice::new_vec_roll(opt.dice, delimiter)?;
 
+    // Format the results
     let result = if opt.sum {
-        let sum = rolls.iter().map(|x| x.iter().sum::<u32>()).sum::<u32>();
+        // Sum
+        let sum: u32 = rolls.iter().map(|x| x.total()).sum();
         if opt.terse {
             sum.to_string()
         } else {
-            let pretty = rolls
-                .iter()
-                .map(|x| Dice::pretty_roll(x))
-                .collect::<Vec<String>>()
-                .join(")\n+ (");
-            format!("{}\n= ({})", sum, pretty)
+            let pretty: Vec<_> = rolls.iter().map(|x| x.pretty_bare()).collect();
+            format!("{}\n= ({})", sum, pretty.join(")\n+ ("))
         }
     } else {
+        // Regular
+        let formatted: Vec<_>;
         if opt.terse {
-            rolls
-                .iter()
-                .map(|x| x.iter().sum::<u32>().to_string())
-                .collect::<Vec<String>>()
-                .join("\n")
+            formatted = rolls.iter().map(|x| x.total().to_string()).collect();
         } else {
-            rolls
-                .iter()
-                .enumerate()
-                .map(|(num, x)| {
-                    format!(
-                        "{}: {} = {}",
-                        dice[num].desc(),
-                        x.iter().sum::<u32>(),
-                        Dice::pretty_roll(x)
-                    )
-                })
-                .collect::<Vec<String>>()
-                .join("\n")
+            formatted = rolls.iter().map(|x| x.pretty()).collect();
         }
+        formatted.join("\n")
     };
 
+    // Output to file if configured
     match opt.output {
-        Some(path) => fs::write(path, format!("{}\n", result))?,
+        Some(path) => std::fs::write(path, format!("{}\n", result))?,
         None => println!("{}", result),
     }
 

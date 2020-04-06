@@ -17,13 +17,19 @@ impl std::fmt::Display for DiceError {
 
 #[derive(Debug)]
 pub struct Dice {
-    desc: String,
+    pub desc: String,
     number: u32,
     value: u32,
 }
 
+#[derive(Debug)]
+pub struct Roll {
+    pub desc: String,
+    rolls: Vec<u32>,
+}
+
 impl Dice {
-    pub fn from_string(string_desc: &str) -> Result<Self> {
+    pub fn new(string_desc: &str) -> Result<Self> {
         let split: Vec<&str> = string_desc.split('d').collect();
         split
             .get(1)
@@ -52,27 +58,45 @@ impl Dice {
         }
     }
 
-    pub fn desc(&self) -> String {
-        self.desc.clone()
+    pub fn roll(&self) -> Roll {
+        let mut rng = thread_rng();
+        let rolls = (0..(self.number))
+            .map(|_| rng.gen_range(1, self.value + 1))
+            .collect();
+        Roll {
+            desc: self.desc.clone(),
+            rolls,
+        }
     }
 
-    pub fn vec_from_string(string_desc: String, delim: char) -> Result<Vec<Self>> {
+    pub fn new_vec(string_desc: String, delim: char) -> Result<Vec<Self>> {
         let mut result = Vec::new();
         for dice in string_desc.split(delim) {
-            result.push(Dice::from_string(dice)?);
+            result.push(Dice::new(dice)?);
         }
         Ok(result)
     }
 
-    pub fn roll(&self) -> Vec<u32> {
-        let mut rng = thread_rng();
-        (0..(self.number))
-            .map(|_| rng.gen_range(1, self.value + 1))
-            .collect()
+    pub fn roll_all(dice: Vec<Dice>) -> Vec<Roll> {
+        dice.into_iter().map(|x| x.roll()).collect()
     }
 
-    pub fn pretty_roll(rolls: &[u32]) -> String {
-        let pretty_rolls: Vec<String> = rolls.iter().map(|x| x.to_string()).collect();
+    pub fn new_vec_roll(string_desc: String, delim: char) -> Result<Vec<Roll>> {
+        Ok(Dice::roll_all(Dice::new_vec(string_desc, delim)?))
+    }
+}
+
+impl Roll {
+    pub fn pretty_bare(&self) -> String {
+        let pretty_rolls: Vec<String> = self.rolls.iter().map(|x| x.to_string()).collect();
         pretty_rolls.join(" + ")
+    }
+
+    pub fn pretty(&self) -> String {
+        format!("{}: {} = {}", self.desc, self.total(), self.pretty_bare())
+    }
+
+    pub fn total(&self) -> u32 {
+        self.rolls.iter().sum()
     }
 }
