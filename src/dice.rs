@@ -23,14 +23,20 @@ impl Dice {
                 value,
             })
         } else {
+            let number = split[0]
+                .parse::<u32>()
+                .with_context(|| format!("'{}' {}", split[0], NUMBER_ERROR))?;
+
             Ok(Dice {
                 desc: String::from(string_desc),
-                number: split[0]
-                    .parse::<u32>()
-                    .with_context(|| format!("'{}' {}", split[0], NUMBER_ERROR))?,
+                number,
                 value,
             })
         }
+    }
+
+    pub fn desc(&self) -> String {
+        self.desc.clone()
     }
 
     pub fn vec_from_string(string_desc: String, delim: char) -> Result<Vec<Self>> {
@@ -48,18 +54,8 @@ impl Dice {
             .collect()
     }
 
-    pub fn total_roll(&self) -> u32 {
-        self.roll().iter().sum()
-    }
-
-    pub fn pretty_roll(&self) -> String {
-        let rolls = self.roll();
-        let total = rolls.iter().sum::<u32>();
-        if rolls.len() == 1 {
-            format!("{}: {}", self.desc, total)
-        } else {
-            let pretty_rolls: Vec<String> = rolls.into_iter().map(|x| x.to_string()).collect();
-            format!("{}: {} = {}", self.desc, total, pretty_rolls.join(" + "),)
-        }
+    pub fn pretty_roll(rolls: &[u32]) -> String {
+        let pretty_rolls: Vec<String> = rolls.iter().map(|x| x.to_string()).collect();
+        pretty_rolls.join(" + ")
     }
 }
