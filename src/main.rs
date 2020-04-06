@@ -5,33 +5,32 @@ use structopt::StructOpt;
 #[derive(StructOpt, Debug)]
 #[structopt(name = "Dice Roller", author, about)]
 struct Opt {
-    /// The delimited set of dice you want to roll, eg "3d20,3d6,d100"
-    #[structopt(name = "DICE")]
-    dice: String,
+    /// The set of dice you want to roll, examples:
+    ///
+    /// "25d2"
+    /// "3d20 3d6 d100"
+    /// "d10"
+    #[structopt(name = "DICE", parse(try_from_str = Dice::new))]
+    dice: Vec<Dice>,
 
-    /// Output file, leave blank for stdout
+    /// Output file, defaults to stdout
     #[structopt(short, long, parse(from_os_str))]
     output: Option<std::path::PathBuf>,
-
-    /// Delimiting character for the list of dice, default ","
-    #[structopt(short, long)]
-    delimiter: Option<char>,
 
     /// Sum the results into one value
     #[structopt(short, long)]
     sum: bool,
 
-    /// Terse (result-only) output
+    /// Terse (result-only) output, useful for scripting
     #[structopt(short, long)]
     terse: bool,
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let opt = Opt::from_args();
-    let delimiter = opt.delimiter.unwrap_or(',');
 
     // Roll our dice
-    let rolls: Vec<_> = Dice::new_vec_roll(opt.dice, delimiter)?;
+    let rolls = Dice::roll_all(opt.dice);
 
     // Format the results
     let result = if opt.sum {

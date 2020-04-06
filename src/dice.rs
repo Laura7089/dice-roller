@@ -69,20 +69,8 @@ impl Dice {
         }
     }
 
-    pub fn new_vec(string_desc: String, delim: char) -> Result<Vec<Self>> {
-        let mut result = Vec::new();
-        for dice in string_desc.split(delim) {
-            result.push(Dice::new(dice)?);
-        }
-        Ok(result)
-    }
-
     pub fn roll_all(dice: Vec<Dice>) -> Vec<Roll> {
         dice.into_iter().map(|x| x.roll()).collect()
-    }
-
-    pub fn new_vec_roll(string_desc: String, delim: char) -> Result<Vec<Roll>> {
-        Ok(Dice::roll_all(Dice::new_vec(string_desc, delim)?))
     }
 }
 
