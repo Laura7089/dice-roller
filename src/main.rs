@@ -28,9 +28,7 @@ struct Opt {
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let opt = Opt::from_args();
-
-    // Roll our dice
-    let rolls = Dice::roll_all(opt.dice);
+    let rolls: Vec<_> = opt.dice.iter().map(|x| x.roll()).collect();
 
     // Format the results
     let result = if opt.sum {
@@ -44,12 +42,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     } else {
         // Regular
-        let formatted: Vec<_>;
-        if opt.terse {
-            formatted = rolls.iter().map(|x| x.total().to_string()).collect();
+        let formatted: Vec<_> = if opt.terse {
+            rolls.iter().map(|x| x.total().to_string()).collect()
         } else {
-            formatted = rolls.iter().map(|x| x.pretty()).collect();
-        }
+            rolls.iter().map(|x| x.pretty()).collect()
+        };
         formatted.join("\n")
     };
 

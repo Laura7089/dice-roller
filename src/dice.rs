@@ -1,13 +1,14 @@
 use rand::prelude::*;
 use std::error::Error;
+use std::fmt::{Display, Formatter};
 
 #[derive(Debug)]
 pub struct DiceError;
 
 impl Error for DiceError {}
 
-impl std::fmt::Display for DiceError {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+impl Display for DiceError {
+    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
         write!(
             f,
             "Bad dice formatting.\nShould be [<number>]d<number>, like '10d6' or 'd8'"
@@ -56,15 +57,11 @@ impl Dice {
             rolls,
         }
     }
-
-    pub fn roll_all(dice: Vec<Dice>) -> Vec<Roll> {
-        dice.into_iter().map(|x| x.roll()).collect()
-    }
 }
 
 impl Roll {
     pub fn pretty_bare(&self) -> String {
-        let pretty_rolls: Vec<String> = self.rolls.iter().map(|x| x.to_string()).collect();
+        let pretty_rolls: Vec<_> = self.rolls.iter().map(|x| x.to_string()).collect();
         pretty_rolls.join(" + ")
     }
 

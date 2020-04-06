@@ -1,6 +1,6 @@
 [package]
 name = "dice-roller"
-description = "Roll dice for rollplaying games from the command line!"
+description = "Roll dice for roleplaying games from the command line!"
 version = "1.0.0"
 authors = ["Laura Demkowicz-Duffy <edward70891@gmail.com>"]
 edition = "2018"
