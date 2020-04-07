@@ -3,7 +3,7 @@ use dice::Dice;
 use structopt::StructOpt;
 
 #[derive(StructOpt, Debug)]
-#[structopt(name = "Dice Roller", author, about)]
+#[structopt(name = "DnDice", author, about)]
 struct Opt {
     /// The set of dice you want to roll, examples:
     ///

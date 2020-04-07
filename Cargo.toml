@@ -1,5 +1,5 @@
 [package]
-name = "dice-roller"
+name = "dndice"
 description = "Roll dice for roleplaying games from the command line"
 version = "1.2.0"
 authors = ["Laura Demkowicz-Duffy <edward70891@gmail.com>"]

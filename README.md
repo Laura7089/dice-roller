@@ -1,4 +1,4 @@
-# Dice Roller
+# DnDice
 
 Roll dice from your command line!
 
